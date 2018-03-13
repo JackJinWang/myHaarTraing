@@ -3,6 +3,8 @@ Date:2018-02-05
 Description:基本参数
 **************************************************/
 #pragma once
+#include<iostream>
+using namespace std;
 #define THREE_CHANNEL 3 //三通道
 #define ONE_CHANNEL 1  //一通道
 
@@ -25,4 +27,8 @@ typedef int    sum_type;
 typedef double sqsum_type;
 typedef short  idx_type;
 typedef void MyArr;
+/*
+* 获取一定范围内不重复的随机数
+*/
+int *getRand(int *result, int low, int high, int number);
 

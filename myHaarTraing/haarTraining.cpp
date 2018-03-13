@@ -1,6 +1,7 @@
 #include "haarTraining.h"
 #include <vector>
 #include <ctype.h>
+
 using namespace std;
 
 /*
@@ -562,6 +563,8 @@ void myHaarTraining(const char* dirname,
 	CvIntHaarFeatures* haar_features = NULL;
 	CvHaarTrainingData* training_data = NULL;           //记住要释放空间
 	MySize winsize;
+	int *number_pos = new int[npos];  //正样本序号集合
+	int *number_neg = new int[nneg];  //负样本序号集合         释放空间
 	winsize = mySize(winwidth, winheight);
 	haar_features = icvCreateIntHaarFeatures(winsize, mode, symmetric); // 计算haar特征个数
 	printf("Number of features used : %d\n", haar_features->count);
@@ -579,7 +582,8 @@ void myHaarTraining(const char* dirname,
 			__MY_EXIT__
 		}
 	//读入图像
-	
+	number_pos = getRand(number_pos,0, cvposdata->count - 1,npos);
+	number_neg = getRand(number_neg, 0, cvbgdata->count - 1, nneg);
 	_MY_END_
 
 }
