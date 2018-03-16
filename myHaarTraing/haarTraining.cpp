@@ -652,14 +652,9 @@ void createTxt(const char* featdirname,CvIntHaarFeatures* haarFeatures)
 	char fileName[100];
 	ofstream *file;
 	file = new ofstream[number];
-	char* b = "\\%d.txt";
 	for (int i = 1;i<=number;++i)
 	{
-		
-	//	char* c = nullptr;                       //初始化char*类型
-	//	c = const_cast<char*>(featdirname);           //const char*类型转char*类型
-	//	sprintf(fileName, strcat(c, b), i);
-		sprintf(fileName, "F:\\workplace\\visualstudio\\facesource\\testpic\\feat\\%d.txt", i);                         //记住更改路径
+		sprintf(fileName, "%s//%d.txt", featdirname,i);//记住更改路径
 		file[i - 1].open(fileName,ios::out);
 		file[i - 1].close();
 	}
@@ -682,17 +677,25 @@ void icvPrecalculate(int num_samples,CvHaarTrainingData* data, CvIntHaarFeatures
 		//生成批量文件
 		createTxt(filedirname, haarFeatures);
 		//计算特征值
+		char fileName[100];
 		float val = 0.0;
+		ofstream *file;
+		file = new ofstream[haarFeatures->count];
 		for (int i = 0; i < num_samples; i++)
 		{
 			for (int j = 0; j < haarFeatures->count; j++)
 			{
-		//		val = cvEvalFastHaarFeature();
-
+				val = cvEvalFastHaarFeature(haarFeatures->fastfeature+j,data->sum.data.i + i * data->sum.width, data->sum.data.i);
+				//sprintf(fileName, "F:\\workplace\\visualstudio\\facesource\\testpic\\feat\\%d.txt", j+1); 
+				sprintf(fileName, "%s//%d.txt", filedirname,j + 1);
+				file[j ].open(fileName, ios::app);
+				file[j ] << val<< endl;
+				file[j].close();
 			}
 		}
+		delete[]file;
 		break;
-	}
+	} 
 	case SAVE_FEATURE_MEM:
 	{
 		
@@ -700,6 +703,42 @@ void icvPrecalculate(int num_samples,CvHaarTrainingData* data, CvIntHaarFeatures
 	}
 	default:
 		break;
+	}
+}
+/*
+*计算当前阶数boost
+*/
+static 
+void icvBoost(int stage, CvIntHaarFeatures* haarFeatures,CvHaarTrainigData* haarTrainingData,
+	const char* featdirname,const char* resultname, int num_pos, int num_neg)
+{
+	int feature_size = haarFeatures->count;
+	char fileName[100];
+	ifstream istream;
+	string str;
+	int *vector = new int[num_pos + num_neg];              //记住要释放
+	int *idx = new int[num_pos + num_neg];
+	for (int i = 0;i < feature_size;i++)
+	{
+		sprintf(fileName, "%s//%d.txt", featdirname, i + 1);//记住更改路径
+		istream.open(fileName,ios::in);
+		if (!istream)
+		{
+			printf("%s打开错误\n", fileName);
+			return;
+		}
+		int count = 0;// 用作计数
+		while (getline(istream, str))   //按行读取,遇到换行符结束
+		{
+			stringstream linestream;
+			linestream << line;
+			linestream >> vector[count];
+			idx[count] = count;
+			count++;		
+		}
+		//对vector排序
+		quickSort(vector, idx, 0, num_pos + num_neg - 1);
+		istream.close();
 	}
 }
 /*
@@ -771,6 +810,7 @@ void myHaarTraining(const char* dirname,
 	MySize winsize;
 	int *number_pos = new int[npos];  //正样本序号集合
 	int *number_neg = new int[nneg];  //负样本序号集合         已经释放空间
+	int current_stage = 0;
 	winsize = mySize(winwidth, winheight);
 	haar_features = icvCreateIntHaarFeatures(winsize, mode, symmetric); // 计算haar特征个数
 	printf("Number of features used : %d\n", haar_features->count);
@@ -792,8 +832,11 @@ void myHaarTraining(const char* dirname,
 	number_neg = getRand(number_neg, 0, cvbgdata->count - 1, nneg);
 	getPicture(training_data, number_pos,npos,POS_FLAG,winsize);
 	getPicture(training_data, number_neg, nneg, NEG_FLAG, winsize);
+	//boost过程
 	//计算特征
 	icvPrecalculate(npos+nneg,training_data, haar_features,numprecalculated, SAVE_FEATURE_FILE, featuredir);
+	icvBoost(current_stage, haar_features, training_data,
+		featuredir, dirname, npos, nneg);
 	_MY_END_
 	if (cvbgdata != NULL)
 	{

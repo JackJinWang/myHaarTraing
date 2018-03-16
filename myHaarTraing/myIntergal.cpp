@@ -196,3 +196,38 @@ void GetGrayIntegralImage(unsigned char *Src, int *Integral, int Width, int Heig
 	}
 	free(ColSum);
 }
+/*
+*快速排序
+*idx 索引数组
+*data_array 排序数组
+*/
+void quickSort(int *data_array, int *idx, int l, int r)
+{
+	if (l< r)
+	{
+		int i = l, j = r, x = data_array[l],y=idx[l];
+		while (i < j)
+		{
+			while (i < j && data_array[j] >= x) // 从右向左找第一个小于x的数  
+				j--;
+			if (i < j)
+			{
+				data_array[i++] = data_array[j];
+				idx[i++] = idx[j];
+			}
+			
+			while (i < j && data_array[i]< x) // 从左向右找第一个大于等于x的数  
+				i++;
+			if (i < j)
+			{
+				data_array[j--] = data_array[i];
+				idx[j--] = idx[i];
+			}
+				
+		}
+		data_array[i] = x;
+		idx[i] = y;
+		quickSort(data_array,idx, l, i - 1); // 递归调用  
+		quickSort(data_array,idx, i + 1, r);
+	}
+}
