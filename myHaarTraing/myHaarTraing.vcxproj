@@ -152,12 +152,15 @@
     <ClCompile Include="basic.cpp" />
     <ClCompile Include="haarTraining.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="myIntergal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basic.h" />
     <ClInclude Include="basicStruct.h" />
     <ClInclude Include="delete.h" />
     <ClInclude Include="haarTraining.h" />
+    <ClInclude Include="MyAutoBuffer.h" />
+    <ClInclude Include="myIntergal.h" />
     <ClInclude Include="MyMat.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

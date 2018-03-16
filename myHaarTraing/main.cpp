@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
 	char* vecname = NULL;
 	char* dirname = NULL;
 	char* bgname = NULL;
-
+	char* freaturedir = NULL;
 	bool bg_vecfile = false;
 	bool pos_vecfile = false;
 	int npos = 2000;
@@ -72,6 +72,11 @@ int main(int argc, char* argv[])
 		{
 			vecname = argv[++i];
 			pos_vecfile = false;
+		}
+		else if (!strcmp(argv[i], "-featuredir"))
+		{
+			freaturedir = argv[++i];
+			
 		}
 		else if (!strcmp(argv[i], "-bg"))
 		{
@@ -195,7 +200,7 @@ int main(int argc, char* argv[])
 			minpos = atoi(argv[++i]);
 		}
 	}
-
+	printf("feature dir name: %s\n", ((freaturedir == NULL) ? nullname : freaturedir));
 	printf("Data dir name: %s\n", ((dirname == NULL) ? nullname : dirname));
 	printf("Vec file name: %s\n", ((vecname == NULL) ? nullname : vecname));
 	printf("BG  file name: %s, is a vecfile: %s\n", ((bgname == NULL) ? nullname : bgname), bg_vecfile ? "yes" : "no");
@@ -222,7 +227,7 @@ int main(int argc, char* argv[])
 	printf("Max number of splits in tree cascade: %d\n", maxtreesplits);
 	printf("Min number of positive samples per cluster: %d\n", minpos);
 
-	myHaarTraining(dirname, vecname, bgname,
+	myHaarTraining(dirname, vecname, bgname, freaturedir,
 		npos, nneg, nstages, mem,
 		nsplits,
 		minhitrate, maxfalsealarm, weightfraction,

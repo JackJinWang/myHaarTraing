@@ -1,9 +1,13 @@
 #include "haarTraining.h"
 #include <vector>
+#include <fstream>
+#include<string>
 #include <ctype.h>
-
+#include"myIntergal.h"
+#include"delete.h"
 using namespace std;
-
+#define POS_FLAG 1
+#define NEG_FLAG 2
 /*
 * get sum image offsets for <rect> corner points
 * step - row step (measured in image pixels!) of sum image
@@ -108,7 +112,7 @@ CvIntHaarFeatures* icvCreateIntHaarFeatures(MySize winsize,
 						}
 					}
 
-					// haar_y2
+					// haar_y2 下减上
 					if ((x + dx <= winsize.width) && (y + dy * 2 <= winsize.height)) {
 						if (dx * 2 * dy < s0) continue;
 						if (!symmetric || (x + x + dx <= winsize.width)) {
@@ -120,7 +124,7 @@ CvIntHaarFeatures* icvCreateIntHaarFeatures(MySize winsize,
 						}
 					}
 
-					// haar_x3  中间-两侧
+					// haar_x3  中间-两侧 横
 					if ((x + dx * 3 <= winsize.width) && (y + dy <= winsize.height)) {
 						if (dx * 3 * dy < s0) continue;
 						if (!symmetric || (x + x + dx * 3 <= winsize.width)) {
@@ -132,7 +136,7 @@ CvIntHaarFeatures* icvCreateIntHaarFeatures(MySize winsize,
 						}
 					}
 
-					// haar_y3
+					// haar_y3 中间-两侧 竖
 					if ((x + dx <= winsize.width) && (y + dy * 3 <= winsize.height)) {
 						if (dx * 3 * dy < s0) continue;
 						if (!symmetric || (x + x + dx <= winsize.width)) {
@@ -424,6 +428,9 @@ typedef struct CvBackgroundData
 CvBackgroundData* cvbgdata = NULL;          //记住要释放
 /*正图片*/
 CvBackgroundData* cvposdata = NULL;      
+/*样本获取计数*/
+int trainingdata_number = 0;
+
 static
 CvBackgroundData* icvCreateBackgroundData(const char* filename,MySize winsize)
 {
@@ -544,11 +551,209 @@ int icvInitPostiveReaders(const char* filename, MySize winsize)
 	return (cvposdata != NULL);
 }
 
+static void getPicture(CvHaarTrainingData* training_data,int *number_all,int number,int flag,MySize mysize)
+{
+	switch (flag)
+	{
+	case NEG_FLAG:
+	{
+		MyMat *tempMat = createMyMat(mysize.height, mysize.width, ONE_CHANNEL, UCHAR_TYPE);                                  //注意最后要释放	
+		MyMat *tempSum = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, INT_TYPE);//注意最后要释放
+																								 //	MyMat *tempTitle = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, INT_TYPE);//注意最后要释放
+																								 //	MyMat *tempSqsum = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, DOUBLE_TYPE);//注意最后要释放
+		for (int i = 0;i < number;i++)
+		{
 
+			int temp = number_all[i];
+			tempMat = transMat(tempMat, cvbgdata->filename[temp]);
+			if (tempMat != nullptr)
+			{
+				//计算积分图
+				//myIntegral(tempMat, tempSum, tempTitle, tempSqsum);
+				int *address = training_data->sum.data.i;
+				GetGrayIntegralImage(tempMat->data.ptr, tempSum->data.i, mysize.width, mysize.height, tempMat->step);
+				//积分图复制到training_data中
+				address = trainingdata_number * (mysize.width + 1)*(mysize.height + 1) + address;
+				memcpy(address, tempSum->data.i, sizeof(int)*(mysize.width + 1)*(mysize.height + 1));
+				training_data->cls.data.fl[trainingdata_number] = 0.0;
+				trainingdata_number++;
+			}
+
+		}
+		releaseMyMat(tempMat);
+		releaseMyMat(tempSum);
+		//	releaseMyMat(tempTitle);
+		//	releaseMyMat(tempSqsum);
+		break;
+	}
+	case POS_FLAG:
+	{
+		MyMat *tempMat = createMyMat(mysize.height, mysize.width, ONE_CHANNEL, UCHAR_TYPE);                                  //注意最后要释放	
+		MyMat *tempSum = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, INT_TYPE);//注意最后要释放
+	//	MyMat *tempTitle = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, INT_TYPE);//注意最后要释放
+	//	MyMat *tempSqsum = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, DOUBLE_TYPE);//注意最后要释放
+		for (int i = 0;i < number;i++)
+		{
+			
+			int temp = number_all[i];
+			tempMat = transMat(tempMat, cvposdata->filename[temp]);
+			if (tempMat != nullptr)
+			{
+				//计算积分图
+				//myIntegral(tempMat, tempSum, tempTitle, tempSqsum);
+				int *address = training_data->sum.data.i;
+				GetGrayIntegralImage(tempMat->data.ptr, tempSum->data.i, mysize.width, mysize.height, tempMat->step);
+				//积分图复制到training_data中
+				address = trainingdata_number * (mysize.width + 1)*(mysize.height + 1) + address;
+				memcpy(address, tempSum->data.i,sizeof(int)*(mysize.width+1)*(mysize.height +1));
+				training_data->cls.data.fl[trainingdata_number] = 1.0;
+				trainingdata_number++;
+			}
+
+		}
+		releaseMyMat(tempMat);
+		releaseMyMat(tempSum);
+	//	releaseMyMat(tempTitle);
+	//	releaseMyMat(tempSqsum);
+		break;
+	}
+	default:
+		break;
+	}
+}
+/*
+*计算特征值
+*/
+float cvEvalFastHaarFeature(const CvFastHaarFeature* feature,
+	const sum_type* sum, const sum_type* tilted)
+{
+	const sum_type* img = feature->tilted ? tilted : sum;
+	float ret = feature->rect[0].weight*
+		(img[feature->rect[0].p0] - img[feature->rect[0].p1] -
+			img[feature->rect[0].p2] + img[feature->rect[0].p3]) +
+		feature->rect[1].weight*
+		(img[feature->rect[1].p0] - img[feature->rect[1].p1] -
+			img[feature->rect[1].p2] + img[feature->rect[1].p3]);
+
+	if (feature->rect[2].weight != 0.0f)
+		ret += feature->rect[2].weight *
+		(img[feature->rect[2].p0] - img[feature->rect[2].p1] -
+			img[feature->rect[2].p2] + img[feature->rect[2].p3]);
+	return ret;
+}
+
+/*
+*预先生成文本
+*/
+static
+void createTxt(const char* featdirname,CvIntHaarFeatures* haarFeatures)
+{
+	int number = haarFeatures->count;
+	char fileName[100];
+	ofstream *file;
+	file = new ofstream[number];
+	char* b = "\\%d.txt";
+	for (int i = 1;i<=number;++i)
+	{
+		
+	//	char* c = nullptr;                       //初始化char*类型
+	//	c = const_cast<char*>(featdirname);           //const char*类型转char*类型
+	//	sprintf(fileName, strcat(c, b), i);
+		sprintf(fileName, "F:\\workplace\\visualstudio\\facesource\\testpic\\feat\\%d.txt", i);                         //记住更改路径
+		file[i - 1].open(fileName,ios::out);
+		file[i - 1].close();
+	}
+	delete []file;
+
+}
+/*
+*获得特征值，并保存处理
+*numprecalculated 内存限制 后续用
+*fileOrMem 特征值存放到文件还是内存 0 内存，1文件
+*/
+static
+void icvPrecalculate(int num_samples,CvHaarTrainingData* data, CvIntHaarFeatures* haarFeatures,
+	int numprecalculated,int fileOrMem,const char* filedirname)
+{
+	switch (fileOrMem)
+	{
+	case SAVE_FEATURE_FILE:
+	{
+		//生成批量文件
+		createTxt(filedirname, haarFeatures);
+		//计算特征值
+		float val = 0.0;
+		for (int i = 0; i < num_samples; i++)
+		{
+			for (int j = 0; j < haarFeatures->count; j++)
+			{
+		//		val = cvEvalFastHaarFeature();
+
+			}
+		}
+		break;
+	}
+	case SAVE_FEATURE_MEM:
+	{
+		
+		break;
+	}
+	default:
+		break;
+	}
+}
+/*
+* 释放空间
+*/
+static
+void icvReleaseHaarTrainingDataCache(CvHaarTrainigData** haarTrainingData)
+{
+	if (haarTrainingData != NULL && (*haarTrainingData) != NULL)
+	{
+		if ((*haarTrainingData)->valcache != NULL)
+		{
+			releaseMyMat((*haarTrainingData)->valcache);
+			(*haarTrainingData)->valcache = NULL;
+		}
+		if ((*haarTrainingData)->idxcache != NULL)
+		{
+			releaseMyMat((*haarTrainingData)->idxcache);
+			(*haarTrainingData)->idxcache = NULL;
+		}
+	}
+}
+static
+void icvReleaseIntHaarFeatures(CvIntHaarFeatures** intHaarFeatures)
+{
+	if (intHaarFeatures != NULL && (*intHaarFeatures) != NULL)
+	{
+		free((*intHaarFeatures));
+		(*intHaarFeatures) = NULL;
+	}
+}
+
+static
+void icvReleaseHaarTrainingData(CvHaarTrainigData** haarTrainingData)
+{
+	if (haarTrainingData != NULL && (*haarTrainingData) != NULL)
+	{
+		
+		icvReleaseHaarTrainingDataCache(haarTrainingData);
+		free((*haarTrainingData));
+	}
+}
+static
+void icvReleaseBackgroundData(CvBackgroundData** data)
+{
+	assert(data != NULL && (*data) != NULL);
+
+	free((*data));
+}
 
 void myHaarTraining(const char* dirname,
 	const char* posfilename,
 	const char* bgfilename,
+	const char* featuredir,
 	int npos, int nneg, int nstages,
 	int numprecalculated,
 	int numsplits,
@@ -560,11 +765,12 @@ void myHaarTraining(const char* dirname,
 	int boosttype, int stumperror,
 	int maxtreesplits, int minpos, bool bg_vecfile,bool pos_vecfile)
 {
+	
 	CvIntHaarFeatures* haar_features = NULL;
-	CvHaarTrainingData* training_data = NULL;           //记住要释放空间
+	CvHaarTrainingData* training_data = NULL;           //记住要释放空间(已经释放)
 	MySize winsize;
 	int *number_pos = new int[npos];  //正样本序号集合
-	int *number_neg = new int[nneg];  //负样本序号集合         释放空间
+	int *number_neg = new int[nneg];  //负样本序号集合         已经释放空间
 	winsize = mySize(winwidth, winheight);
 	haar_features = icvCreateIntHaarFeatures(winsize, mode, symmetric); // 计算haar特征个数
 	printf("Number of features used : %d\n", haar_features->count);
@@ -584,6 +790,23 @@ void myHaarTraining(const char* dirname,
 	//读入图像
 	number_pos = getRand(number_pos,0, cvposdata->count - 1,npos);
 	number_neg = getRand(number_neg, 0, cvbgdata->count - 1, nneg);
+	getPicture(training_data, number_pos,npos,POS_FLAG,winsize);
+	getPicture(training_data, number_neg, nneg, NEG_FLAG, winsize);
+	//计算特征
+	icvPrecalculate(npos+nneg,training_data, haar_features,numprecalculated, SAVE_FEATURE_FILE, featuredir);
 	_MY_END_
-
+	if (cvbgdata != NULL)
+	{
+		icvReleaseBackgroundData(&cvbgdata);
+		cvbgdata = NULL;
+	}
+	if (cvposdata != NULL)
+	{
+		icvReleaseBackgroundData(&cvposdata);
+		cvposdata = NULL;
+	}
+	free(number_pos);
+	free(number_neg);
+	icvReleaseIntHaarFeatures(&haar_features);
+	icvReleaseHaarTrainingData(&training_data);
 }

@@ -1,7 +1,9 @@
 #pragma once
 #include"basic.h"
+#include<time.h>
 int *getRand(int *result, int low, int high,int number)
 {
+	srand((unsigned)time(NULL));
 	int allnumber = high - low + 1;
 	int i,t = 0;
 	int *markrand = new int[allnumber];

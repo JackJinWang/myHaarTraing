@@ -4,7 +4,9 @@ Description:基本参数
 **************************************************/
 #pragma once
 #include<iostream>
+
 using namespace std;
+
 #define THREE_CHANNEL 3 //三通道
 #define ONE_CHANNEL 1  //一通道
 
@@ -13,7 +15,8 @@ using namespace std;
 #define UCHAR_TYPE 3
 #define DOUBLE_TYPE 4
 #define SHORT_TYPE 5
-
+#define SAVE_FEATURE_FILE 0
+#define SAVE_FEATURE_MEM 1
 #ifndef PATH_MAX
 #define PATH_MAX 512
 #endif /* PATH_MAX */

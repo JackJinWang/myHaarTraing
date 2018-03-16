@@ -106,6 +106,7 @@ typedef struct CvHaarTrainingData
 void myHaarTraining(const char* dirname,
 	const char* posfilename,
 	const char* bgfilename,
+	const char* featuredir,
 	int npos, int nneg, int nstages,
 	int numprecalculated,
 	int numsplits,

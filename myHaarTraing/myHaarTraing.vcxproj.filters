@@ -24,6 +24,9 @@
     <ClCompile Include="basic.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="myIntergal.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyMat.h">
@@ -39,6 +42,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="delete.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MyAutoBuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="myIntergal.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
