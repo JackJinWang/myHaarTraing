@@ -1,10 +1,14 @@
 #include "haarTraining.h"
 #include <vector>
 #include <fstream>
+#include"tinyxml2.h"
+using namespace tinyxml2;
 #include<string>
 #include <ctype.h>
+#include <math.h>
 #include"myIntergal.h"
 #include"delete.h"
+#include"classifier.h"
 using namespace std;
 #define POS_FLAG 1
 #define NEG_FLAG 2
@@ -559,8 +563,8 @@ static void getPicture(CvHaarTrainingData* training_data,int *number_all,int num
 	{
 		MyMat *tempMat = createMyMat(mysize.height, mysize.width, ONE_CHANNEL, UCHAR_TYPE);                                  //注意最后要释放	
 		MyMat *tempSum = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, INT_TYPE);//注意最后要释放
-																								 //	MyMat *tempTitle = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, INT_TYPE);//注意最后要释放
-																								 //	MyMat *tempSqsum = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, DOUBLE_TYPE);//注意最后要释放
+	//  MyMat *tempTitle = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, INT_TYPE);//注意最后要释放
+	 //   MyMat *tempSqsum = createMyMat(mysize.height + 1, mysize.width + 1, ONE_CHANNEL, DOUBLE_TYPE);//注意最后要释放
 		for (int i = 0;i < number;i++)
 		{
 
@@ -569,9 +573,10 @@ static void getPicture(CvHaarTrainingData* training_data,int *number_all,int num
 			if (tempMat != nullptr)
 			{
 				//计算积分图
-				//myIntegral(tempMat, tempSum, tempTitle, tempSqsum);
+		//		myIntegral(tempMat, tempSum, tempTitle, tempSqsum);
 				int *address = training_data->sum.data.i;
 				GetGrayIntegralImage(tempMat->data.ptr, tempSum->data.i, mysize.width, mysize.height, tempMat->step);
+				//GetGraySqImage(tempMat->data.ptr, tempSqsum->data.i, mysize.width, mysize.height, tempMat->step);
 				//积分图复制到training_data中
 				address = trainingdata_number * (mysize.width + 1)*(mysize.height + 1) + address;
 				memcpy(address, tempSum->data.i, sizeof(int)*(mysize.width + 1)*(mysize.height + 1));
@@ -583,7 +588,7 @@ static void getPicture(CvHaarTrainingData* training_data,int *number_all,int num
 		releaseMyMat(tempMat);
 		releaseMyMat(tempSum);
 		//	releaseMyMat(tempTitle);
-		//	releaseMyMat(tempSqsum);
+		//releaseMyMat(tempSqsum);
 		break;
 	}
 	case POS_FLAG:
@@ -650,15 +655,18 @@ void createTxt(const char* featdirname,CvIntHaarFeatures* haarFeatures)
 {
 	int number = haarFeatures->count;
 	char fileName[100];
-	ofstream *file;
-	file = new ofstream[number];
+//	ofstream *file;
+//	file = new ofstream[number];
+	ofstream file;
 	for (int i = 1;i<=number;++i)
 	{
 		sprintf(fileName, "%s//%d.txt", featdirname,i);//记住更改路径
-		file[i - 1].open(fileName,ios::out);
-		file[i - 1].close();
+//		file[i - 1].open(fileName,ios::out);
+//		file[i - 1].close();
+		file.open(fileName, ios::out);
+		file.close();
 	}
-	delete []file;
+//	delete []file;
 
 }
 /*
@@ -679,21 +687,28 @@ void icvPrecalculate(int num_samples,CvHaarTrainingData* data, CvIntHaarFeatures
 		//计算特征值
 		char fileName[100];
 		float val = 0.0;
-		ofstream *file;
-		file = new ofstream[haarFeatures->count];
+		//ofstream *file;
+		//file = new ofstream[haarFeatures->count];
+		ofstream file;
 		for (int i = 0; i < num_samples; i++)
 		{
 			for (int j = 0; j < haarFeatures->count; j++)
 			{
 				val = cvEvalFastHaarFeature(haarFeatures->fastfeature+j,data->sum.data.i + i * data->sum.width, data->sum.data.i);
-				//sprintf(fileName, "F:\\workplace\\visualstudio\\facesource\\testpic\\feat\\%d.txt", j+1); 
-				sprintf(fileName, "%s//%d.txt", filedirname,j + 1);
-				file[j ].open(fileName, ios::app);
-				file[j ] << val<< endl;
-				file[j].close();
+				//sprintf(fileName, "F:\\workplace\\visualstudio\\facesource\\testpic\\feat\\%d.txt", j+1); 		
+				
+				sprintf(fileName, "%s//%d.txt", filedirname, j + 1);
+			//	file[j].open(fileName, ios::app);
+			//	file[j] << val << endl;
+			//	file[j].close();
+				file.open(fileName, ios::app);
+				file << val << endl;
+				file.close();
+
 			}
 		}
-		delete[]file;
+
+	//	delete[]file;
 		break;
 	} 
 	case SAVE_FEATURE_MEM:
@@ -706,40 +721,212 @@ void icvPrecalculate(int num_samples,CvHaarTrainingData* data, CvIntHaarFeatures
 	}
 }
 /*
-*计算当前阶数boost
+*更新权重
+*/
+static void icvSetWeightsAndClasses(CvHaarTrainingData* training_data,
+	int num1, float weight1, float cls1,
+	int num2, float weight2, float cls2)
+{
+	int j;
+
+	assert(num1 + num2 <= training_data->maxnum);
+
+	for (j = 0; j < num1; j++)
+	{
+		training_data->weights.data.fl[j] = weight1;
+		training_data->cls.data.fl[j] = cls1;
+	}
+	for (j = num1; j < num1 + num2; j++)
+	{
+		training_data->weights.data.fl[j] = weight2;
+		training_data->cls.data.fl[j] = cls2;
+	}
+}
+static 
+void saveXML(int stage,vector<MyStumpClassifier> strongClassifier,const char* dirname)
+{
+	XMLDocument doc;
+	MyStumpClassifier weakClassifier;
+	// 创建根元素<China>  
+	XMLElement* root = doc.NewElement("root");
+	doc.InsertEndChild(root);
+	char son[100];
+	for (int i = 0;i < 200;i++)
+	{
+		weakClassifier = strongClassifier[i];
+		sprintf(son, "%d", i);
+		XMLElement* cityElement = doc.NewElement(son);
+		cityElement->SetAttribute("compidx", weakClassifier.compidx); // 设置元素属性  
+		cityElement->SetAttribute("error", weakClassifier.error); // 设置元素属性  
+		cityElement->SetAttribute("left", weakClassifier.left); // 设置元素属性  
+		cityElement->SetAttribute("right", weakClassifier.right); // 设置元素属性  
+		cityElement->SetAttribute("threshold", weakClassifier.threshold); // 设置元素属性  
+		root->InsertEndChild(cityElement);
+	}
+	char docName[100];
+	sprintf(docName,"stage%d.xml",stage);
+	doc.SaveFile(docName);
+}
+/*
+*计算当前阶数boost，若要增加弱分类器深度操作numsplits
 */
 static 
 void icvBoost(int stage, CvIntHaarFeatures* haarFeatures,CvHaarTrainigData* haarTrainingData,
-	const char* featdirname,const char* resultname, int num_pos, int num_neg)
+	const char* featdirname,const char* resultname, int num_pos, int num_neg,int numsplits,int equalweights,const char* dirname)
 {
+	float posweight, negweight;
 	int feature_size = haarFeatures->count;
-	char fileName[100];
+	char fileName[100];	                 
 	ifstream istream;
 	string str;
-	int *vector = new int[num_pos + num_neg];              //记住要释放
-	int *idx = new int[num_pos + num_neg];
-	for (int i = 0;i < feature_size;i++)
+	float threshold;//阈值
+	int sampleNumber = num_pos + num_neg;
+	MyStumpClassifier tempWeakClassifier;//弱分类器计算
+	vector<MyStumpClassifier> strongClassifier;//强分类器
+	//MyStumpClassifier *currentWeakClassifier = new MyStumpClassifier[numsplits];    
+	MyStumpClassifier currentWeakClassifier; //当前阶弱分类器
+	int *vector = new int[sampleNumber];              //特征向量，记住要释放
+	int *idx = new int[sampleNumber];						//特征索引号	
+	int *m_result = new int[sampleNumber];       //m阶分类结果
+	
+	for (int T = 0; T < 200;T++)
 	{
-		sprintf(fileName, "%s//%d.txt", featdirname, i + 1);//记住更改路径
-		istream.open(fileName,ios::in);
-		if (!istream)
+		//更新权重
+
+		if (T == 0)
 		{
-			printf("%s打开错误\n", fileName);
-			return;
+			posweight = (equalweights) ? 1.0F / (num_pos + num_neg) : (0.5F / num_pos);
+			negweight = (equalweights) ? 1.0F / (num_pos + num_neg) : (0.5F / num_neg);
+			icvSetWeightsAndClasses(haarTrainingData,
+				num_pos, posweight, 1.0F, num_neg, negweight, 0.0F);
 		}
-		int count = 0;// 用作计数
-		while (getline(istream, str))   //按行读取,遇到换行符结束
+		else
 		{
-			stringstream linestream;
-			linestream << line;
-			linestream >> vector[count];
-			idx[count] = count;
-			count++;		
+			float bt;
+			bt = currentWeakClassifier.error / (1.0f - currentWeakClassifier.error);
+			for (int ll = 0;ll < sampleNumber;ll++)
+			{
+				if((1 - m_result[ll])==1)
+				haarTrainingData->weights.data.fl[ll] = haarTrainingData->weights.data.fl[ll] * pow(bt, 1);
+				else
+					haarTrainingData->weights.data.fl[ll] = haarTrainingData->weights.data.fl[ll] * pow(bt, 0);
+			}
 		}
-		//对vector排序
-		quickSort(vector, idx, 0, num_pos + num_neg - 1);
-		istream.close();
+		//开始计算弱分类器
+		for (int i = 0;i < feature_size;i++)
+		{
+
+			sprintf(fileName, "%s//%d.txt", featdirname, i + 1);//记住更改路径
+			istream.open(fileName, ios::in);
+			if (!istream)
+			{
+				printf("%s打开错误\n", fileName);
+				return;
+			}
+			int count = 0;// 用作计数
+			while (getline(istream, str))   //按行读取,遇到换行符结束
+			{
+				stringstream linestream;
+				linestream << str;
+				linestream >> vector[count];
+				idx[count] = count;
+				count++;
+			}
+			//对vector排序
+			bubbleSort(vector, idx, sampleNumber);
+
+			//弱分类器训练
+			for (int k = 0;k < sampleNumber - 1;k++)
+			{
+				//循环默认阈值左侧为1，右侧为0 即 左侧人脸
+				threshold = 0.5F * (vector[k] + vector[k + 1]);    //求取阈值
+				float errorL = 0.0F; //左侧错误率            
+				float errorR = 0.0F; //右侧错误率
+				float error = 0.0F; //错误率
+				float left = 1;  //左侧标签
+				float right = 0;  //右侧标签
+				for (int n = 0;n < sampleNumber;n++)
+				{
+					float object = haarTrainingData->cls.data.fl[idx[n]];  //取出当前样本标签
+					if ((vector[n] < threshold) && (object != left))    //如果左侧样本错误
+					{
+						errorL = errorL + haarTrainingData->weights.data.fl[idx[n]] * 1.0;
+						m_result[idx[n]] = 0;
+					}
+					else if (vector[n] < threshold)
+						m_result[idx[n]] = 1;
+					if ((vector[n] > threshold) && (object != right))    //如果右侧样本错误
+					{
+						errorR = errorR + haarTrainingData->weights.data.fl[idx[n]] * 1.0;
+						m_result[idx[n]] = 0;
+					}
+					else if (vector[n] > threshold)
+						m_result[idx[n]] = 1;
+				}
+				//	error = MIN(errorL + errorR, 1 - errorL - errorR);
+				if (errorL + errorR > 0.5)//左右极性交换
+				{
+					left = 0;
+					right = 1;
+					error = 1 - errorL - errorR;
+					for (int mm = 0;mm < sampleNumber;mm++)
+					{
+						if (m_result[mm] == 0)
+							m_result[mm] = 1;
+						else
+							m_result[mm] = 0;
+					}
+				}
+				else
+					error = errorL + errorR;
+				//两个分数相加四舍五入的原因会出现负数情况
+				if (error < 0)
+				{
+					error = 0.0;
+				}
+				if (k == 0)
+				{
+					tempWeakClassifier.compidx = i;
+					tempWeakClassifier.left = left;
+					tempWeakClassifier.right = right;
+					tempWeakClassifier.threshold = threshold;
+					tempWeakClassifier.error = error;
+				}
+				else if (error < tempWeakClassifier.error)
+				{
+					tempWeakClassifier.compidx = i;
+					tempWeakClassifier.left = left;
+					tempWeakClassifier.right = right;
+					tempWeakClassifier.threshold = threshold;
+					tempWeakClassifier.error = error;
+				}
+			}
+			if (i == 0)
+			{
+				currentWeakClassifier.compidx = tempWeakClassifier.compidx;
+				currentWeakClassifier.left = tempWeakClassifier.left;
+				currentWeakClassifier.right = tempWeakClassifier.right;
+				currentWeakClassifier.threshold = tempWeakClassifier.threshold;
+				currentWeakClassifier.error = tempWeakClassifier.error;
+			}
+			else if (tempWeakClassifier.error < currentWeakClassifier.error)
+			{
+				currentWeakClassifier.compidx = tempWeakClassifier.compidx;
+				currentWeakClassifier.left = tempWeakClassifier.left;
+				currentWeakClassifier.right = tempWeakClassifier.right;
+				currentWeakClassifier.threshold = tempWeakClassifier.threshold;
+				currentWeakClassifier.error = tempWeakClassifier.error;
+			}
+			istream.close();
+		}
+		
+		strongClassifier.push_back(currentWeakClassifier);
 	}
+
+	saveXML(0, strongClassifier,dirname);
+ 	delete[]vector;
+	delete[]idx;
+	delete[]m_result;
 }
 /*
 * 释放空间
@@ -830,13 +1017,15 @@ void myHaarTraining(const char* dirname,
 	//读入图像
 	number_pos = getRand(number_pos,0, cvposdata->count - 1,npos);
 	number_neg = getRand(number_neg, 0, cvbgdata->count - 1, nneg);
+	//收集样本 级联要替换样本
+	trainingdata_number = 0;
 	getPicture(training_data, number_pos,npos,POS_FLAG,winsize);
 	getPicture(training_data, number_neg, nneg, NEG_FLAG, winsize);
 	//boost过程
 	//计算特征
 	icvPrecalculate(npos+nneg,training_data, haar_features,numprecalculated, SAVE_FEATURE_FILE, featuredir);
 	icvBoost(current_stage, haar_features, training_data,
-		featuredir, dirname, npos, nneg);
+		featuredir, dirname, npos, nneg, numsplits, equalweights, dirname);
 	_MY_END_
 	if (cvbgdata != NULL)
 	{

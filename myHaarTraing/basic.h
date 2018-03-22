@@ -23,7 +23,13 @@ using namespace std;
 
 #define _MY_END_ exit:;
 #define __MY_EXIT__        goto exit;
+#ifndef MIN
+#  define MIN(a,b)  ((a) > (b) ? (b) : (a))
+#endif
 
+#ifndef MAX
+#  define MAX(a,b)  ((a) < (b) ? (b) : (a))
+#endif
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef int    sum_type;

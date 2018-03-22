@@ -196,38 +196,41 @@ void GetGrayIntegralImage(unsigned char *Src, int *Integral, int Width, int Heig
 	}
 	free(ColSum);
 }
+//求解平方积分图
+void GetGraySqImage(unsigned char *Src, int *Integral, int Width, int Height, int Stride)
+{
+	uchar *copy = new uchar[Width*Height];
+	for (int i = 0;i < Width;i++)
+	{
+		for (int j = 0;j < Height;j++)
+		{
+			copy[j + i * Width] = Src[j + i * Width] * Src[j + i * Width];
+		}
+	}
+	GetGrayIntegralImage(copy,Integral,Width,Height,Stride);
+	delete []copy;
+}
 /*
-*快速排序
+*冒泡排序
 *idx 索引数组
 *data_array 排序数组
 */
-void quickSort(int *data_array, int *idx, int l, int r)
+void bubbleSort(int* pData, int *idx, int length)
 {
-	if (l< r)
+	int temp, idxt;
+	for (int i = 0;i != length;++i)
 	{
-		int i = l, j = r, x = data_array[l],y=idx[l];
-		while (i < j)
+		for (int j = 0; j != length; ++j)
 		{
-			while (i < j && data_array[j] >= x) // 从右向左找第一个小于x的数  
-				j--;
-			if (i < j)
+			if (pData[i] < pData[j])
 			{
-				data_array[i++] = data_array[j];
-				idx[i++] = idx[j];
+				temp = pData[i];
+				idxt = idx[i];
+				pData[i] = pData[j];
+				idx[i] = idx[j];
+				pData[j] = temp;
+				idx[j] = idxt;
 			}
-			
-			while (i < j && data_array[i]< x) // 从左向右找第一个大于等于x的数  
-				i++;
-			if (i < j)
-			{
-				data_array[j--] = data_array[i];
-				idx[j--] = idx[i];
-			}
-				
 		}
-		data_array[i] = x;
-		idx[i] = y;
-		quickSort(data_array,idx, l, i - 1); // 递归调用  
-		quickSort(data_array,idx, i + 1, r);
 	}
 }

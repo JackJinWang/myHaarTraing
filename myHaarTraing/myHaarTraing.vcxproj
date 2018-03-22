@@ -153,15 +153,18 @@
     <ClCompile Include="haarTraining.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="myIntergal.cpp" />
+    <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basic.h" />
     <ClInclude Include="basicStruct.h" />
+    <ClInclude Include="classifier.h" />
     <ClInclude Include="delete.h" />
     <ClInclude Include="haarTraining.h" />
     <ClInclude Include="MyAutoBuffer.h" />
     <ClInclude Include="myIntergal.h" />
     <ClInclude Include="MyMat.h" />
+    <ClInclude Include="tinyxml2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

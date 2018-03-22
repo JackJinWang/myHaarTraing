@@ -27,6 +27,9 @@
     <ClCompile Include="myIntergal.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="tinyxml2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyMat.h">
@@ -48,6 +51,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="myIntergal.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="classifier.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tinyxml2.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
