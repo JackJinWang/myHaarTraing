@@ -751,28 +751,91 @@ void saveXML(int stage,vector<MyStumpClassifier> strongClassifier,const char* di
 	XMLElement* root = doc.NewElement("root");
 	doc.InsertEndChild(root);
 	char son[100];
-	for (int i = 0;i < 200;i++)
+	for (int i = 0;i < 50;i++)
 	{
 		weakClassifier = strongClassifier[i];
-		sprintf(son, "%d", i);
-		XMLElement* cityElement = doc.NewElement(son);
-		cityElement->SetAttribute("compidx", weakClassifier.compidx); // 设置元素属性  
-		cityElement->SetAttribute("error", weakClassifier.error); // 设置元素属性  
-		cityElement->SetAttribute("left", weakClassifier.left); // 设置元素属性  
-		cityElement->SetAttribute("right", weakClassifier.right); // 设置元素属性  
-		cityElement->SetAttribute("threshold", weakClassifier.threshold); // 设置元素属性  
-		root->InsertEndChild(cityElement);
+
+		XMLElement* sonElement = doc.NewElement("weak");
+		sonElement->SetAttribute("id", i);
+		root->InsertEndChild(sonElement);
+		XMLElement* sunElement1 = doc.NewElement("haarfeature");
+		sunElement1->SetText(weakClassifier.compidx);
+		sonElement->InsertEndChild(sunElement1);
+		
+		XMLElement* sunElement2 = doc.NewElement("error");
+		sunElement2->SetText(weakClassifier.error);
+		sonElement->InsertEndChild(sunElement2);
+		XMLElement* sunElement3 = doc.NewElement("left");
+		sunElement3->SetText(weakClassifier.left);
+		sonElement->InsertEndChild(sunElement3);
+
+		XMLElement* sunElement4 = doc.NewElement("right");
+		sunElement4->SetText(weakClassifier.right);
+		sonElement->InsertEndChild(sunElement4);
+		XMLElement* sunElement5 = doc.NewElement("threshold");
+		sunElement5->SetText(weakClassifier.threshold);
+		sonElement->InsertEndChild(sunElement5);
+
+
 	}
 	char docName[100];
-	sprintf(docName,"stage%d.xml",stage);
+	sprintf(docName,"stage%d.xml",4);
 	doc.SaveFile(docName);
+}
+/*
+*对图片进行预测
+*/
+static 
+int* predict(int* preResult,int pictureNum,CvIntHaarFeatures* haarFeatures, CvHaarTrainigData* haarTrainingData, vector<MyStumpClassifier> strongClassifier)
+{
+	/*
+	*计算加和 0.5 * (a1 + a2 + a3 +...)
+	*/
+	int length = strongClassifier.size();
+	float *at = new float[length];
+	float sum = 0.0f;
+	for (int i = 0;i < length;i++)
+	{
+		float error = strongClassifier[i].error;
+		float b = error / (1 - error);
+		at[i] = log(1 / b);
+		sum = sum + at[i];
+	}
+	/*
+	*对图片进行预测分类
+	*/
+
+	for (int i = 0;i < pictureNum;i++)
+	{
+		float val = 0.0f;
+		float predictSum = 0.0;
+		for (int j = 0;j < length;j++)
+		{
+			int featureNum = strongClassifier[j].compidx;
+			val = cvEvalFastHaarFeature(haarFeatures->fastfeature + featureNum, haarTrainingData->sum.data.i + i * haarTrainingData->sum.width, haarTrainingData->sum.data.i);
+			if ((val < strongClassifier[j].threshold) && (haarTrainingData->cls.data.fl[i] == strongClassifier[j].left))
+			{
+				predictSum = predictSum + at[j];
+			}
+			else if ((val > strongClassifier[j].threshold) && (haarTrainingData->cls.data.fl[i] == strongClassifier[j].right))
+			{
+				predictSum = predictSum + at[j];
+			}
+		}
+		if (predictSum >= sum)
+			preResult[i] = 1;
+		else
+			preResult[i] = 0;
+	}
+	delete[]at;
+
 }
 /*
 *计算当前阶数boost，若要增加弱分类器深度操作numsplits
 */
 static 
 void icvBoost(int stage, CvIntHaarFeatures* haarFeatures,CvHaarTrainigData* haarTrainingData,
-	const char* featdirname,const char* resultname, int num_pos, int num_neg,int numsplits,int equalweights,const char* dirname)
+	const char* featdirname,const char* resultname, int num_pos, int num_neg,int numsplits,int equalweights,const char* dirname, float minhitrate, float maxfalsealarms)
 {
 	float posweight, negweight;
 	int feature_size = haarFeatures->count;
@@ -788,8 +851,9 @@ void icvBoost(int stage, CvIntHaarFeatures* haarFeatures,CvHaarTrainigData* haar
 	int *vector = new int[sampleNumber];              //特征向量，记住要释放
 	int *idx = new int[sampleNumber];						//特征索引号	
 	int *m_result = new int[sampleNumber];       //m阶分类结果
-	
-	for (int T = 0; T < 200;T++)
+	int *predit_result = new int[sampleNumber]; //阶段预测
+//	int T = 0;
+	for (int T = 0; T < 50;T++)
 	{
 		//更新权重
 
@@ -804,12 +868,20 @@ void icvBoost(int stage, CvIntHaarFeatures* haarFeatures,CvHaarTrainigData* haar
 		{
 			float bt;
 			bt = currentWeakClassifier.error / (1.0f - currentWeakClassifier.error);
+			float sum = 0.0f;
 			for (int ll = 0;ll < sampleNumber;ll++)
 			{
 				if((1 - m_result[ll])==1)
 				haarTrainingData->weights.data.fl[ll] = haarTrainingData->weights.data.fl[ll] * pow(bt, 1);
 				else
 					haarTrainingData->weights.data.fl[ll] = haarTrainingData->weights.data.fl[ll] * pow(bt, 0);
+				sum = sum + haarTrainingData->weights.data.fl[ll];
+			}
+			//归一化
+			
+			for (int ll = 0;ll < sampleNumber;ll++)
+			{
+				haarTrainingData->weights.data.fl[ll] = haarTrainingData->weights.data.fl[ll] / sum;
 			}
 		}
 		//开始计算弱分类器
@@ -880,9 +952,9 @@ void icvBoost(int stage, CvIntHaarFeatures* haarFeatures,CvHaarTrainigData* haar
 				else
 					error = errorL + errorR;
 				//两个分数相加四舍五入的原因会出现负数情况
-				if (error < 0)
+				if (error <= 0)
 				{
-					error = 0.0;
+					error = 0.0000000000001;
 				}
 				if (k == 0)
 				{
@@ -1025,7 +1097,7 @@ void myHaarTraining(const char* dirname,
 	//计算特征
 	icvPrecalculate(npos+nneg,training_data, haar_features,numprecalculated, SAVE_FEATURE_FILE, featuredir);
 	icvBoost(current_stage, haar_features, training_data,
-		featuredir, dirname, npos, nneg, numsplits, equalweights, dirname);
+		featuredir, dirname, npos, nneg, numsplits, equalweights, dirname,minhitrate,maxfalsealarm);
 	_MY_END_
 	if (cvbgdata != NULL)
 	{

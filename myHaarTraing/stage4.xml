@@ -1,0 +1,352 @@
+<root>
+    <weak id="0">
+        <haarfeature>32379</haarfeature>
+        <error>0.057142496</error>
+        <left>0</left>
+        <right>1</right>
+        <threshold>76</threshold>
+    </weak>
+    <weak id="1">
+        <haarfeature>28211</haarfeature>
+        <error>0.0072335768</error>
+        <left>0</left>
+        <right>1</right>
+        <threshold>12</threshold>
+    </weak>
+    <weak id="2">
+        <haarfeature>28211</haarfeature>
+        <error>5.4576623e-05</error>
+        <left>0</left>
+        <right>1</right>
+        <threshold>12</threshold>
+    </weak>
+    <weak id="3">
+        <haarfeature>11867</haarfeature>
+        <error>4.4268633e-09</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-262</threshold>
+    </weak>
+    <weak id="4">
+        <haarfeature>11867</haarfeature>
+        <error>1.9597126e-17</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-262</threshold>
+    </weak>
+    <weak id="5">
+        <haarfeature>11867</haarfeature>
+        <error>3.8404725e-34</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-262</threshold>
+    </weak>
+    <weak id="6">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="7">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="8">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="9">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="10">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="11">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="12">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="13">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="14">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="15">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="16">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="17">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="18">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="19">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="20">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="21">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="22">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="23">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="24">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="25">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="26">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="27">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="28">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="29">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="30">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="31">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="32">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="33">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="34">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="35">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="36">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="37">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="38">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="39">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="40">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="41">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="42">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="43">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="44">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="45">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="46">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="47">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="48">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+    <weak id="49">
+        <haarfeature>0</haarfeature>
+        <error>9.9999998e-14</error>
+        <left>1</left>
+        <right>0</right>
+        <threshold>-22</threshold>
+    </weak>
+</root>
