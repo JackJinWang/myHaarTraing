@@ -779,7 +779,7 @@ void saveXML(int stage,vector<MyStumpClassifier> strongClassifier,const char* di
 
 	}
 	char docName[100];
-	sprintf(docName, "%s//stage%d.xml", dirname, 0);
+	sprintf(docName, "%s//stage%d.xml", dirname, 161);
 	doc.SaveFile(docName);
 }
 /*
@@ -860,7 +860,8 @@ void icvBoost(int stage, CvIntHaarFeatures* haarFeatures,CvHaarTrainigData* haar
 	int T = 0;
 
 	//for (int T = 0; T < 50;T++)
-	while((hitRate_real<=minhitrate)&&(maxFalse_real >= maxfalsealarms)&&(T <= 50))
+	while(((hitRate_real<=minhitrate)||(maxFalse_real >= maxfalsealarms))&&(T <= 50))
+	//while (T <= 50)
 	{
 		//更新权重
 
