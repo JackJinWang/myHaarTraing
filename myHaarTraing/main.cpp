@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 	float weightfraction = 0.95F;
 	int mode = 0;
 	int symmetric = 1;
-	int equalweights = 1;
+	int equalweights = 0;
 	int width = 24;
 	int height = 24;
 	const char* boosttypes[] = { "DAB", "RAB", "LB", "GAB" };
